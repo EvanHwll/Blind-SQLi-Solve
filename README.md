@@ -1,9 +1,9 @@
 # Blind SQLi Solve
 
 Recently, I've been researching the idea of Web Exploitation and learning different methods such as SQL Injections and XSS Attacks. 
-I was completing a lab on TryHackMe, and reached a task which involved a Blind SQLi.
+I was completing a lab on [TryHackMe](https://tryhackme.com/room/sqlilab), and reached a task which involved a Blind SQLi.
 
-This was different to everything I had been experimenting with before, and I knew to solve this task I would have to implement some new techniques, and decided to document my learning.
+This was different to everything I had been experimenting with before, and I knew to solve this task I would have to implement some new techniques, and decided to document my approach and learning.
 
 ### Understanding the Difference
 
