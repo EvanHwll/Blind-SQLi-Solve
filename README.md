@@ -23,6 +23,7 @@ Password: letmein
 ```
 After seeing that this login form was vulnerable to SQL Injection, I decided to test the responses it gave to try and find any consistent differences which would allow me to use a Boolean-Based approach. I opened BurpSuite and intercepted 2 responses from the web server: one where the login succeeded, and the other where the login failed.
 
+<br>
 <img width="500" height="550" alt="image" src="https://github.com/user-attachments/assets/12d476e2-b5e6-4e5e-adcb-55f52566e8bb" />
 <img width="500" height="550" alt="image" src="https://github.com/user-attachments/assets/3bbd79bd-9631-46cc-88cc-4126de8ef9bc" />
 
@@ -39,14 +40,18 @@ After using each of these payloads in the username field, I received a 302 Respo
 
 Now I had all the information I needed, I could begin writing a Python program that could aid me in solving this problem. I created a new Python project and wrote a simple function that creates a POST Request to a destination with some parameters, and returns True if the response code was 302, False if it was 200, and raises a ValueError otherwise.
 
+<br>
 <img width="1344" height="534" alt="image" src="https://github.com/user-attachments/assets/bb89121c-a1a4-4a9e-9dc9-c9ceb38d4998" />
 
 To test this was working, I created some obvious test cases that should evaluate to True and False. However, I did not get the expected results. Even though `a` should evaluate to True, it was still returning False.
+
+<br>
 <img width="1328" height="382" alt="image" src="https://github.com/user-attachments/assets/4648b77c-c000-4e21-bd6c-b5aed3e376e6" />
 
 
 After reading a [discussion on StackOverflow](https://stackoverflow.com/questions/58163496/getting-200-in-response-instead-of-302), I found the reason. The requests module automatically follows redirects, meaning the response it was giving was actually for the home page of the website. To fix this, I added an extra parameter, `allow_redirects=False`. This solved the problem.
 
+<br>
 <img width="1344" height="534" alt="image" src="https://github.com/user-attachments/assets/d5c81da3-95c9-4a4f-88b6-74c8b5a6237e" />
 
 <img width="1328" height="382" alt="image" src="https://github.com/user-attachments/assets/09f0e98c-2889-4700-abbd-cddabbc3b097" />
@@ -69,9 +74,13 @@ Which would be implemented as
 ' OR ( SELECT COUNT(*) FROM sqlite_master WHERE type='table' ) = X--
 ```
 And if this returned a 302 Redirect, it would be true and would mean that there are X tables in the database. Here is how I implemented that:
+
+<br>
 <img width="2468" height="496" alt="image" src="https://github.com/user-attachments/assets/5452d3ae-0b36-4efd-a534-99640d31721d" />
 
 I then wrote some code to call that function and store the result in `number_of_tables`. Printing out this value gave me `1`, meaning there is only 1 table in the database.
+
+<br>
 <img width="712" height="230" alt="image" src="https://github.com/user-attachments/assets/1b1e2f09-5c68-4bcb-aa2f-3df9c6f7e0b7" />
 
 The next thing I needed to do was figure out the name of this table so I could query it. Like before, my mind instantly went to:
@@ -90,10 +99,12 @@ and repeat until the end of the string.
 
 But, this introduced a new problem. I would need to know where the end of the string was. To do this, I decided to use the same function I had written earlier to perform a linear search for the length of the table name.
 
+<br>
 <img width="2992" height="496" alt="image" src="https://github.com/user-attachments/assets/65853ab0-75c5-40a0-a553-04cb7d5b23c2" />
 
 Although not required, I gave this function a parameter `tableIndex` that would allow me to specify what table number to check. In this case, I am checking the first (and only) table, so I passed in the argument `1`, and got the output `5`.
 
+<br>
 <img width="2992" height="648" alt="image" src="https://github.com/user-attachments/assets/23e27c7f-06df-449a-91ea-a7e9816afcdf" />
 
 This meant the name of the table had 5 characters, that I could then search for.
@@ -124,10 +135,13 @@ And finally, I could compare these to determine if the numerical value is too bi
 Which I could then use to form the Binary Search.
 
 Using the standard method for Binary Search, I created this function:
+
+<br>
 <img width="3454" height="1256" alt="image" src="https://github.com/user-attachments/assets/f4d9c012-989e-470c-92f0-d3430e9bca26" />
 
 To test this worked, I used the following line:
 
+<br>
 <img width="726" height="154" alt="image" src="https://github.com/user-attachments/assets/c40d7bdb-dde7-4083-b8d5-d6346804b756" />
 
 Meaning the first character was `u`.
@@ -140,10 +154,12 @@ I then wrote a function that combined all previous functions:
   <li>For each character, binary search its value.</li>
 </ol>
 
+<br>
 <img width="1436" height="800" alt="image" src="https://github.com/user-attachments/assets/cbaf5f0c-6dad-4a02-b757-0a7e67080e27" />
 
 Now, when I print the value of this function:
 
+<br>
 <img width="558" height="154" alt="image" src="https://github.com/user-attachments/assets/151a9a54-a98a-4c2f-a0b8-cc7d7d479552" />
 
 Meaning the name of our table is `users`!
@@ -159,10 +175,12 @@ SELECT sql FROM sqlite_master WHERE name='users'
 
 However, like before, I could not see what this outputted. Luckily, I already had a solution written - the character binary search algorithm. With a few minor tweaks, I could adapt this function to now pull the characters from this result.
 
+<br>
 <img width="3114" height="1370" alt="image" src="https://github.com/user-attachments/assets/2b3e6bd8-e0b8-4c72-abd3-650a22d4915f" />
 
 To confirm this was working, I ran the function on the first character. I should see `C`, as that is the first letter of CREATE.
 
+<br>
 <img width="880" height="154" alt="image" src="https://github.com/user-attachments/assets/d8ac566d-b94b-472a-8a4c-319f5aea021a" />
 
 Thankfully, I saw `C`, meaning my function was working as expected.
@@ -171,10 +189,12 @@ I could then write one more function, `findCreateCommand(table_name)`, which goe
 
 One problem I had however, is deciding how to decide where the end of the command was. I considered reusing my code finding the length of table names to find the length of this command instead. However, a cleaner solution would be just to terminate the process when we find the character `)`, which indicates the end of the CREATE statement.
 
+<br>
 <img width="1112" height="686" alt="image" src="https://github.com/user-attachments/assets/b468c59d-51c4-4dcd-9073-a437171bfd14" />
 
 Calling this function gives:
 
+<br>
 <img width="712" height="306" alt="image" src="https://github.com/user-attachments/assets/819d915c-8f1b-447b-9197-74a304ba7fcc" />
 
 Meaning the field names are `id` (primary key), `username` and `password`.
@@ -192,12 +212,14 @@ To finish the task (assuming field names do as they seem). As obvious by now, I 
 In order to find all the characters, I needed to find either a stopping condition or the length of the password. However, I wanted to explore one alternative method, and that was making use of the way `SUBSTR()` works.
 As mentioned earlier, `SUBSTR()` has 3 parameters: `string`, `start`, `length`. However, if start is greater than the length of the actual string, the `SUBSTR()` method just returns an empty string `''`. When comparing the empty string to an ASCII value, it will **always** be less than it, meaning we will never return a character. As there are 128 characters, Binary Search will always find a value within 7 passes. This means if we reach our 8th pass without returning a character, we can assume it is the end of the string.
 
+<br>
 <img width="3128" height="1598" alt="image" src="https://github.com/user-attachments/assets/80925fc2-d71b-4d44-a5bd-e59c0aebe95b" />
 
 <img width="1034" height="648" alt="image" src="https://github.com/user-attachments/assets/0b2443b4-8b4e-4b37-ba14-fa01dc62d6ff" />
 
 Upon calling `findPassword("users")`, this is printed:
 
+<br>
 <img width="804" height="154" alt="image" src="https://github.com/user-attachments/assets/803601b8-ace1-4707-95e2-f0a2eb760597" />
 
 **Which is our flag to solve the puzzle!**
