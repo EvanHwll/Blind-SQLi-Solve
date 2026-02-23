@@ -7,7 +7,7 @@ This was different to everything I had been experimenting with before, and I kne
 
 ### Understanding the Difference
 
-In Blind SQL Injections, you can not directly see any of the results from your injected queries. This means that you have to use alternative methods to infer them, and there are two main types: Boolean-based and Time-based.
+In Blind SQL Injections, you cannot directly see any of the results from your injected queries. This means that you have to use alternative methods to infer them, and there are two main types: Boolean-based and Time-based.
 
 In boolean-based, you are able to infer whether your condition evaluated to true or false based on a consistent difference in the response, such as a significantly different response length. However, time-based approaches include a wait clause in the select statement, meaning if the condition evaluates to true it delays the response by a certain amount of time.
 
@@ -21,7 +21,7 @@ When I opened the website, I was greeted with a simple login form. I wanted to t
 Username: ' OR 1=1--
 Password: letmein
 ```
-After seeing that this login form was vulnerable to SQL Injection, I decided to test the responses it gave to try and find any consistent differences which would allow me to use a Boolean-Based approach. I opened BurpSuite and intercepted 2 responses from the web server: one where the login succeeded, and the other where the login failed.
+After seeing that this login form was vulnerable to SQL Injection, I decided to test the responses it gave to try and find any consistent differences which would allow me to use a Boolean-based approach. I opened BurpSuite and intercepted 2 responses from the web server: one where the login succeeded, and the other where the login failed.
 
 <br>
 <img width="500" height="550" alt="image" src="https://github.com/user-attachments/assets/12d476e2-b5e6-4e5e-adcb-55f52566e8bb" />
@@ -113,7 +113,7 @@ However, I noticed one optimisation problem with my initial approach. As ASCII i
 
 Looking at the ASCII chart, I considered changing my bounds to 32 (space) and 126 (~). However, this only reduced the range to 94 characters, which is still a very significant potential amount to make for each character.
 
-I decided a good approach would be to implement a Binary Search, which would lower the time complexity from O(n) to O(logn). Binary search requires numerical values that can be compared, but I was using characters. However, I realised I could just use the ASCII numerical values for each character instead, meaning I could use those instead and then convert back to their character representation afterwards.
+I decided a good approach would be to implement a Binary Search, which would lower the time complexity from O(n) to O(log n). Binary search requires numerical values that can be compared, but I was using characters. However, I realised I could just use the ASCII numerical values for each character instead, meaning I could use those instead and then convert back to their character representation afterwards.
 
 To implement this, I would use the SQLite `SUBSTR(string, startIndex, length)` method to isolate each character one by one:
 ```
@@ -127,9 +127,9 @@ CHAR(int)
 
 And finally, I could compare these to determine if the numerical value is too big, too small or is a match:
 ```
-'OR ( SELECT SUBSTR(name, 1, i) FROM sqlite_master WHERE type='table' ) > CHAR(int)--
-'OR ( SELECT SUBSTR(name, 1, i) FROM sqlite_master WHERE type='table' ) < CHAR(int)--
-'OR ( SELECT SUBSTR(name, 1, i) FROM sqlite_master WHERE type='table' ) = CHAR(int)--
+'OR ( SELECT SUBSTR(name, i, 1) FROM sqlite_master WHERE type='table' ) > CHAR(int)--
+'OR ( SELECT SUBSTR(name, i, 1) FROM sqlite_master WHERE type='table' ) < CHAR(int)--
+'OR ( SELECT SUBSTR(name, i, 1) FROM sqlite_master WHERE type='table' ) = CHAR(int)--
 ```
 
 Which I could then use to form the Binary Search.
@@ -173,7 +173,7 @@ Now that I had a list of table names (albeit, just the one), I can run one simpl
 SELECT sql FROM sqlite_master WHERE name='users'
 ```
 
-However, like before, I could not see what this outputted. Luckily, I already had a solution written - the character binary search algorithm. With a few minor tweaks, I could adapt this function to now pull the characters from this result.
+However, like before, I could not see what this output. Luckily, I already had a solution written - the character binary search algorithm. With a few minor tweaks, I could adapt this function to now pull the characters from this result.
 
 <br>
 <img width="3114" height="1370" alt="image" src="https://github.com/user-attachments/assets/2b3e6bd8-e0b8-4c72-abd3-650a22d4915f" />
